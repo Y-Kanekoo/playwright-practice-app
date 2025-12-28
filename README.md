@@ -62,21 +62,26 @@ playwright-practice-app/
 │   ├── components/       # UIコンポーネント
 │   │   ├── LoginForm.tsx
 │   │   ├── TodoList.tsx
-│   │   └── TodoItem.tsx
+│   │   ├── TodoItem.tsx
+│   │   └── WeatherWidget.tsx
 │   ├── pages/            # ページコンポーネント
 │   │   ├── LoginPage.tsx
 │   │   └── TodoPage.tsx
 │   ├── contexts/         # Reactコンテキスト
 │   │   └── AuthContext.tsx
 │   ├── types/            # 型定義
-│   │   └── index.ts
+│   │   ├── index.ts
+│   │   └── api.ts
+│   ├── services/         # APIサービス
+│   │   └── api.ts
 │   ├── App.tsx
 │   └── main.tsx
 │
 ├── tests/
 │   ├── e2e/              # E2Eテスト
 │   │   ├── login.spec.ts
-│   │   └── todo.spec.ts
+│   │   ├── todo.spec.ts
+│   │   └── api-mock.spec.ts
 │   ├── fixtures/         # テストフィクスチャ
 │   │   └── index.ts
 │   └── pages/            # Page Objects
@@ -100,6 +105,11 @@ playwright-practice-app/
 - 完了済みの一括削除
 - ログアウト
 
+### 天気ウィジェット
+- 都市名で天気情報を取得（APIモック用）
+- 気温・天気・湿度を表示
+- ローディング状態・エラー表示
+
 ## 学習ロードマップ
 
 - [x] プロジェクトセットアップ
@@ -108,5 +118,7 @@ playwright-practice-app/
 - [x] Page Object Model
 - [x] テストフィクスチャ
 - [x] 複数ブラウザテスト（Chromium, Firefox, WebKit, Mobile）
-- [ ] APIモック・インターセプション
+- [x] APIモック・インターセプション
 - [ ] ビジュアルリグレッションテスト
+- [ ] 並列実行とテスト分離
+- [ ] CI/CD連携（GitHub Actions）
