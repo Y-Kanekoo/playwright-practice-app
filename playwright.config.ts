@@ -33,11 +33,20 @@ export default defineConfig({
   },
 
   // レポーター設定
-  // CI環境: GitHub Actions用 + HTML
-  // ローカル: HTML のみ
+  // CI環境: GitHub Actions用 + HTML + カスタム
+  // ローカル: HTML + カスタム
   reporter: process.env.CI
-    ? [['github'], ['html', { open: 'never' }]]
-    : [['html', { open: 'on-failure' }]],
+    ? [
+        ['github'],
+        ['html', { open: 'never' }],
+        ['./tests/reporters/json-summary.ts'],
+        ['./tests/reporters/markdown.ts'],
+      ]
+    : [
+        ['html', { open: 'on-failure' }],
+        ['./tests/reporters/json-summary.ts'],
+        ['./tests/reporters/markdown.ts'],
+      ],
 
   // 全てのテストで共通の設定
   use: {

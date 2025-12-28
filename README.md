@@ -85,7 +85,12 @@ playwright-practice-app/
 │   │   ├── api-mock.spec.ts
 │   │   ├── visual.spec.ts
 │   │   ├── visual.spec.ts-snapshots/  # ベースライン画像
-│   │   └── isolation.spec.ts
+│   │   ├── isolation.spec.ts
+│   │   ├── performance.spec.ts
+│   │   └── accessibility.spec.ts
+│   ├── reporters/         # カスタムレポーター
+│   │   ├── json-summary.ts
+│   │   └── markdown.ts
 │   ├── fixtures/         # テストフィクスチャ
 │   │   └── index.ts
 │   └── pages/            # Page Objects
@@ -186,6 +191,54 @@ npx playwright test --workers=4
 npx playwright test --workers=1
 ```
 
+## カスタムレポート
+
+独自のレポーターでテスト結果を出力します。
+
+### 出力ファイル
+- `test-results/test-summary.json` - JSON形式のサマリー
+- `test-results/test-report.md` - Markdown形式のレポート
+
+### 含まれる情報
+- 実行時間、成功/失敗数
+- プロジェクト別結果
+- 失敗したテストの詳細
+- 遅いテストTop 5
+
+## パフォーマンステスト
+
+Web Vitals やページ読み込み時間を測定します。
+
+### 測定項目
+- **LCP** (Largest Contentful Paint): 2.5秒以内
+- **FCP** (First Contentful Paint): 1.8秒以内
+- **CLS** (Cumulative Layout Shift): 0.1以内
+- **TTFB** (Time to First Byte): 500ms以内
+
+### コマンド
+
+```bash
+npx playwright test tests/e2e/performance.spec.ts
+```
+
+## アクセシビリティテスト
+
+axe-core を使用してWCAG 2.1準拠をチェックします。
+
+### チェック項目
+- WCAG 2.1 Level A/AA準拠
+- キーボードナビゲーション
+- スクリーンリーダー対応（ARIAラベル）
+- コントラスト比
+- フォーカス表示
+
+### コマンド
+
+```bash
+# アクセシビリティテストのみ実行
+npx playwright test tests/e2e/accessibility.spec.ts
+```
+
 ## 機能
 
 ### ログインページ (`/`)
@@ -217,3 +270,6 @@ npx playwright test --workers=1
 - [x] CI/CD連携（GitHub Actions）
 - [x] ビジュアルリグレッションテスト
 - [x] 並列実行とテスト分離
+- [x] カスタムレポート作成
+- [x] パフォーマンステスト
+- [x] アクセシビリティテスト

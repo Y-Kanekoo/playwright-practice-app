@@ -53,8 +53,8 @@
 
 .form-group input:focus {
   outline: none;
-  border-color: #646cff;
-  box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.2);
+  border-color: #4a50d9;
+  box-shadow: 0 0 0 2px rgba(74, 80, 217, 0.2);
 }
 
 .form-group input:disabled {
@@ -75,7 +75,7 @@
 .login-form button[type="submit"] {
   width: 100%;
   padding: 12px;
-  background-color: #646cff;
+  background-color: #4a50d9;  /* コントラスト比 4.5:1以上に改善 */
   color: white;
   border: none;
   border-radius: 6px;
@@ -86,7 +86,7 @@
 }
 
 .login-form button[type="submit"]:hover {
-  background-color: #535bf2;
+  background-color: #3d42c0;
 }
 
 .login-form button[type="submit"]:disabled {
@@ -97,7 +97,7 @@
 .hint {
   margin-top: 16px;
   text-align: center;
-  color: #888;
+  color: #595959;  /* コントラスト比 7:1以上（WCAG AAA準拠） */
   font-size: 0.85rem;
 }
 
@@ -154,13 +154,13 @@
 
 .add-todo-form input:focus {
   outline: none;
-  border-color: #646cff;
-  box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.2);
+  border-color: #4a50d9;
+  box-shadow: 0 0 0 2px rgba(74, 80, 217, 0.2);
 }
 
 .add-todo-form button {
   padding: 10px 20px;
-  background-color: #646cff;
+  background-color: #4a50d9;  /* コントラスト比改善 */
   color: white;
   border: none;
   border-radius: 6px;
@@ -170,7 +170,7 @@
 }
 
 .add-todo-form button:hover {
-  background-color: #535bf2;
+  background-color: #3d42c0;
 }
 
 /* フィルターボタン */
@@ -195,9 +195,9 @@
 }
 
 .filter-buttons button.active {
-  background-color: #646cff;
+  background-color: #4a50d9;
   color: white;
-  border-color: #646cff;
+  border-color: #4a50d9;
 }
 
 /* TODOリスト */
