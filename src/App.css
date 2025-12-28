@@ -301,3 +301,89 @@
 .clear-completed:hover {
   background-color: #fee;
 }
+
+/* 天気ウィジェット */
+.weather-widget {
+  margin-top: 32px;
+  padding: 16px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background-color: #fafafa;
+}
+
+.weather-widget h3 {
+  margin: 0 0 12px 0;
+  font-size: 1rem;
+  color: #555;
+}
+
+.weather-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.weather-form input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.weather-form button {
+  padding: 8px 16px;
+  background-color: #4a9eff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.weather-form button:hover {
+  background-color: #3a8eef;
+}
+
+.weather-form button:disabled {
+  background-color: #999;
+  cursor: not-allowed;
+}
+
+.weather-error {
+  padding: 8px;
+  background-color: #fee;
+  border: 1px solid #fcc;
+  border-radius: 4px;
+  color: #c00;
+  font-size: 0.85rem;
+}
+
+.weather-info {
+  text-align: center;
+  padding: 12px;
+}
+
+.weather-city {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.weather-temp {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #4a9eff;
+  margin: 8px 0;
+}
+
+.weather-condition {
+  font-size: 1rem;
+  color: #666;
+}
+
+.weather-humidity {
+  font-size: 0.85rem;
+  color: #888;
+  margin-top: 4px;
+}

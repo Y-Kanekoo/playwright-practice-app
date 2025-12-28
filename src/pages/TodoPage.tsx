@@ -1,4 +1,5 @@
 import { TodoList } from '../components/TodoList';
+import { WeatherWidget } from '../components/WeatherWidget';
 import { useAuth } from '../contexts/AuthContext';
 import { Navigate, useNavigate } from 'react-router-dom';
 
@@ -30,6 +31,7 @@ export function TodoPage() {
         </div>
       </header>
       <TodoList />
+      <WeatherWidget />
     </div>
   );
 }
