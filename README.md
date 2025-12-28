@@ -82,7 +82,9 @@ playwright-practice-app/
 │   ├── e2e/              # E2Eテスト
 │   │   ├── login.spec.ts
 │   │   ├── todo.spec.ts
-│   │   └── api-mock.spec.ts
+│   │   ├── api-mock.spec.ts
+│   │   ├── visual.spec.ts
+│   │   └── visual.spec.ts-snapshots/  # ベースライン画像
 │   ├── fixtures/         # テストフィクスチャ
 │   │   └── index.ts
 │   └── pages/            # Page Objects
@@ -116,6 +118,31 @@ GitHub Actionsでテストを自動実行します。
 2. 該当のワークフロー実行を選択
 3. 「Artifacts」セクションから `playwright-report` をダウンロード
 
+## ビジュアルリグレッションテスト
+
+スクリーンショット比較でUIの意図しない変更を検出します。
+
+### コマンド
+
+```bash
+# ベースライン生成・更新
+npx playwright test tests/e2e/visual.spec.ts --update-snapshots
+
+# 比較テスト実行
+npx playwright test tests/e2e/visual.spec.ts
+```
+
+### テスト対象
+- ログインページ（初期表示、エラー状態、フォーカス状態）
+- TODOページ（空、アイテムあり、完了状態、フィルター適用）
+- コンポーネント単位（フォーム、リスト、ウィジェット）
+- レスポンシブ（モバイル、タブレット）
+
+### ベースライン管理
+- スナップショットは `tests/e2e/visual.spec.ts-snapshots/` に保存
+- OS/ブラウザごとに別ファイル（例: `login-page-chromium-darwin.png`）
+- Gitでバージョン管理推奨
+
 ## 機能
 
 ### ログインページ (`/`)
@@ -145,5 +172,5 @@ GitHub Actionsでテストを自動実行します。
 - [x] 複数ブラウザテスト（Chromium, Firefox, WebKit, Mobile）
 - [x] APIモック・インターセプション
 - [x] CI/CD連携（GitHub Actions）
-- [ ] ビジュアルリグレッションテスト
+- [x] ビジュアルリグレッションテスト
 - [ ] 並列実行とテスト分離
