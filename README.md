@@ -107,6 +107,6 @@ playwright-practice-app/
 - [x] ロケーター戦略
 - [x] Page Object Model
 - [x] テストフィクスチャ
-- [ ] 複数ブラウザテスト
+- [x] 複数ブラウザテスト（Chromium, Firefox, WebKit, Mobile）
 - [ ] APIモック・インターセプション
 - [ ] ビジュアルリグレッションテスト
