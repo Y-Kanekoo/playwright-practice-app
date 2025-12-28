@@ -91,6 +91,13 @@ playwright-practice-app/
 │   ├── reporters/         # カスタムレポーター
 │   │   ├── json-summary.ts
 │   │   └── markdown.ts
+│   ├── notifications/     # 通知システム
+│   │   ├── providers/     # 通知プロバイダー
+│   │   │   ├── slack.ts
+│   │   │   ├── discord.ts
+│   │   │   ├── teams.ts
+│   │   │   └── webhook.ts
+│   │   └── index.ts
 │   ├── fixtures/         # テストフィクスチャ
 │   │   └── index.ts
 │   └── pages/            # Page Objects
@@ -239,6 +246,54 @@ axe-core を使用してWCAG 2.1準拠をチェックします。
 npx playwright test tests/e2e/accessibility.spec.ts
 ```
 
+## テスト結果通知
+
+テスト完了時に各種サービスに通知を送信できます。
+
+### 対応サービス
+
+| サービス | 環境変数 | 説明 |
+|---------|---------|------|
+| Slack | `SLACK_WEBHOOK_URL` | Incoming Webhooks |
+| Discord | `DISCORD_WEBHOOK_URL` | Webhooks |
+| Microsoft Teams | `TEAMS_WEBHOOK_URL` | Incoming Webhook |
+| 汎用Webhook | `WEBHOOK_URL` | JSON形式で送信 |
+| Console | - | 開発用 |
+
+### 設定方法
+
+```typescript
+// playwright.config.ts
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+  reporter: [
+    ['html'],
+    ['./tests/notifications', {
+      type: 'slack',  // 'slack' | 'discord' | 'teams' | 'webhook' | 'console'
+      webhookUrl: process.env.SLACK_WEBHOOK_URL,
+      notifyOn: {
+        failure: true,   // 失敗時に通知
+        success: false,  // 成功時は通知しない
+        always: false,   // 常に通知
+      },
+      mentions: {
+        onFailure: ['U12345678'],  // 失敗時にメンション
+      },
+    }],
+  ],
+});
+```
+
+### 複数の通知先
+
+```typescript
+reporter: [
+  ['./tests/notifications', { type: 'slack', webhookUrl: '...' }],
+  ['./tests/notifications', { type: 'discord', webhookUrl: '...' }],
+],
+```
+
 ## 機能
 
 ### ログインページ (`/`)
@@ -273,3 +328,4 @@ npx playwright test tests/e2e/accessibility.spec.ts
 - [x] カスタムレポート作成
 - [x] パフォーマンステスト
 - [x] アクセシビリティテスト
+- [x] テスト結果通知（Slack/Discord/Teams/Webhook）
