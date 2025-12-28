@@ -8,6 +8,7 @@ Playwright を使ったE2Eテストの学習・練習用アプリケーション
 - **ビルドツール**: Vite
 - **E2Eテスト**: Playwright
 - **ルーティング**: React Router
+- **CI/CD**: GitHub Actions
 
 ## セットアップ
 
@@ -88,8 +89,32 @@ playwright-practice-app/
 │       ├── LoginPage.ts
 │       └── TodoPage.ts
 │
+├── .github/
+│   └── workflows/
+│       └── playwright.yml  # GitHub Actions設定
+│
 └── playwright.config.ts
 ```
+
+## CI/CD
+
+GitHub Actionsでテストを自動実行します。
+
+### トリガー
+- `main` ブランチへのpush
+- `main` ブランチへのPull Request
+
+### ワークフロー内容
+1. Node.js 20 のセットアップ
+2. 依存関係のインストール
+3. Playwrightブラウザのインストール
+4. 全テスト実行
+5. テストレポートをArtifactとして保存（30日間）
+
+### Artifactの確認方法
+1. GitHubリポジトリの「Actions」タブを開く
+2. 該当のワークフロー実行を選択
+3. 「Artifacts」セクションから `playwright-report` をダウンロード
 
 ## 機能
 
@@ -119,6 +144,6 @@ playwright-practice-app/
 - [x] テストフィクスチャ
 - [x] 複数ブラウザテスト（Chromium, Firefox, WebKit, Mobile）
 - [x] APIモック・インターセプション
+- [x] CI/CD連携（GitHub Actions）
 - [ ] ビジュアルリグレッションテスト
 - [ ] 並列実行とテスト分離
-- [ ] CI/CD連携（GitHub Actions）
