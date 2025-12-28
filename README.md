@@ -77,6 +77,8 @@ playwright-practice-app/
 │   ├── e2e/              # E2Eテスト
 │   │   ├── login.spec.ts
 │   │   └── todo.spec.ts
+│   ├── fixtures/         # テストフィクスチャ
+│   │   └── index.ts
 │   └── pages/            # Page Objects
 │       ├── LoginPage.ts
 │       └── TodoPage.ts
@@ -104,7 +106,7 @@ playwright-practice-app/
 - [x] 基本的なテストの書き方
 - [x] ロケーター戦略
 - [x] Page Object Model
-- [ ] テストフィクスチャ
+- [x] テストフィクスチャ
 - [ ] 複数ブラウザテスト
 - [ ] APIモック・インターセプション
 - [ ] ビジュアルリグレッションテスト
