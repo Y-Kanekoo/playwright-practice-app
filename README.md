@@ -84,7 +84,8 @@ playwright-practice-app/
 │   │   ├── todo.spec.ts
 │   │   ├── api-mock.spec.ts
 │   │   ├── visual.spec.ts
-│   │   └── visual.spec.ts-snapshots/  # ベースライン画像
+│   │   ├── visual.spec.ts-snapshots/  # ベースライン画像
+│   │   └── isolation.spec.ts
 │   ├── fixtures/         # テストフィクスチャ
 │   │   └── index.ts
 │   └── pages/            # Page Objects
@@ -143,6 +144,48 @@ npx playwright test tests/e2e/visual.spec.ts
 - OS/ブラウザごとに別ファイル（例: `login-page-chromium-darwin.png`）
 - Gitでバージョン管理推奨
 
+## 並列実行とテスト分離
+
+Playwrightはデフォルトで並列実行とテスト分離をサポートしています。
+
+### 並列実行設定
+
+```typescript
+// playwright.config.ts
+export default defineConfig({
+  fullyParallel: true,        // テストファイル内も並列
+  workers: process.env.CI ? 2 : undefined,  // ワーカー数
+});
+```
+
+### テスト分離
+- 各テストは独立したブラウザコンテキストで実行
+- localStorage、Cookie、セッションは共有されない
+- テスト間の状態汚染を防止
+
+### 順序制御（必要な場合）
+
+```typescript
+// 順序を保証したい場合
+test.describe.serial('順序が重要なテスト', () => {
+  test('ステップ1', async () => { /* ... */ });
+  test('ステップ2', async () => { /* ... */ });
+});
+```
+
+### コマンド
+
+```bash
+# 並列実行（デフォルト）
+npx playwright test
+
+# ワーカー数を指定
+npx playwright test --workers=4
+
+# 単一ワーカーで実行
+npx playwright test --workers=1
+```
+
 ## 機能
 
 ### ログインページ (`/`)
@@ -173,4 +216,4 @@ npx playwright test tests/e2e/visual.spec.ts
 - [x] APIモック・インターセプション
 - [x] CI/CD連携（GitHub Actions）
 - [x] ビジュアルリグレッションテスト
-- [ ] 並列実行とテスト分離
+- [x] 並列実行とテスト分離
