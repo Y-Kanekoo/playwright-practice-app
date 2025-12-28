@@ -1,149 +1,111 @@
-import { test, expect } from '@playwright/test';
-import { LoginPage } from '../pages/LoginPage';
-import { TodoPage } from '../pages/TodoPage';
+import { test, expect, sampleTodos } from '../fixtures';
 
 /**
  * TODOリスト機能のテスト
- * Page Object Modelパターンを使用
+ * authenticatedTodoPageフィクスチャを使用（自動でログイン済み）
  */
 test.describe('TODOリスト', () => {
-  let loginPage: LoginPage;
-  let todoPage: TodoPage;
-
-  // 各テスト前にログインしてTODOページへ移動
-  test.beforeEach(async ({ page }) => {
-    loginPage = new LoginPage(page);
-    todoPage = new TodoPage(page);
-
-    await loginPage.goto();
-    await loginPage.loginAsTestUser();
-    await loginPage.expectNavigatedToTodos();
+  // authenticatedTodoPageを使用すると、テスト開始時に既にログイン済み
+  test('TODOページが正しく表示される', async ({ authenticatedTodoPage }) => {
+    await authenticatedTodoPage.expectPageVisible();
+    await authenticatedTodoPage.expectUserName('テストユーザー');
+    await expect(authenticatedTodoPage.logoutButton).toBeVisible();
+    await authenticatedTodoPage.expectEmptyMessage(
+      'タスクがありません。新しいタスクを追加してください。'
+    );
   });
 
-  test('TODOページが正しく表示される', async () => {
-    // ページ要素の確認
-    await todoPage.expectPageVisible();
-    await todoPage.expectUserName('テストユーザー');
-    await expect(todoPage.logoutButton).toBeVisible();
+  test('新しいTODOを追加できる', async ({ authenticatedTodoPage }) => {
+    // sampleTodosフィクスチャからテストデータを使用
+    await authenticatedTodoPage.addTodo(sampleTodos.shopping);
 
-    // 空メッセージ確認
-    await todoPage.expectEmptyMessage('タスクがありません。新しいタスクを追加してください。');
+    await authenticatedTodoPage.expectTodoVisible(sampleTodos.shopping);
+    await authenticatedTodoPage.expectInputCleared();
+    await authenticatedTodoPage.expectFilterCount('all', 1);
+    await authenticatedTodoPage.expectFilterCount('active', 1);
   });
 
-  test('新しいTODOを追加できる', async () => {
-    const todoText = '買い物に行く';
-
-    // タスクを追加
-    await todoPage.addTodo(todoText);
-
-    // タスクが追加されたことを確認
-    await todoPage.expectTodoVisible(todoText);
-    await todoPage.expectInputCleared();
-    await todoPage.expectFilterCount('all', 1);
-    await todoPage.expectFilterCount('active', 1);
+  test('空のテキストではTODOを追加できない', async ({ authenticatedTodoPage }) => {
+    await authenticatedTodoPage.addButton.click();
+    await authenticatedTodoPage.expectEmptyMessage();
   });
 
-  test('空のテキストではTODOを追加できない', async () => {
-    // 空のまま追加ボタンをクリック
-    await todoPage.addButton.click();
+  test('TODOを完了にできる', async ({ authenticatedTodoPage }) => {
+    const todoText = sampleTodos.cleaning;
 
-    // 空メッセージが表示されたままであることを確認
-    await todoPage.expectEmptyMessage();
+    await authenticatedTodoPage.addTodo(todoText);
+    await authenticatedTodoPage.toggleTodo(todoText);
+
+    await authenticatedTodoPage.expectTodoCompleted(todoText);
+    await authenticatedTodoPage.expectFilterCount('active', 0);
+    await authenticatedTodoPage.expectFilterCount('completed', 1);
   });
 
-  test('TODOを完了にできる', async () => {
-    const todoText = 'テストタスク';
+  test('TODOを削除できる', async ({ authenticatedTodoPage }) => {
+    const todoText = sampleTodos.cooking;
 
-    // タスクを追加
-    await todoPage.addTodo(todoText);
+    await authenticatedTodoPage.addTodo(todoText);
+    await authenticatedTodoPage.deleteTodo(todoText);
 
-    // 完了にする
-    await todoPage.toggleTodo(todoText);
-
-    // 完了状態の確認
-    await todoPage.expectTodoCompleted(todoText);
-    await todoPage.expectFilterCount('active', 0);
-    await todoPage.expectFilterCount('completed', 1);
+    await authenticatedTodoPage.expectTodoNotVisible(todoText);
+    await authenticatedTodoPage.expectEmptyMessage();
   });
 
-  test('TODOを削除できる', async () => {
-    const todoText = '削除するタスク';
-
-    // タスクを追加
-    await todoPage.addTodo(todoText);
-
-    // 削除
-    await todoPage.deleteTodo(todoText);
-
-    // タスクが削除されたことを確認
-    await todoPage.expectTodoNotVisible(todoText);
-    await todoPage.expectEmptyMessage();
-  });
-
-  test('フィルターでTODOを絞り込める', async () => {
+  test('フィルターでTODOを絞り込める', async ({ authenticatedTodoPage }) => {
     // 複数のタスクを追加
-    await todoPage.addTodo('タスク1');
-    await todoPage.addTodo('タスク2');
-
-    // タスク1を完了にする
-    await todoPage.toggleTodo('タスク1');
+    await authenticatedTodoPage.addTodo('タスク1');
+    await authenticatedTodoPage.addTodo('タスク2');
+    await authenticatedTodoPage.toggleTodo('タスク1');
 
     // 未完了フィルター
-    await todoPage.showActive();
-    await todoPage.expectTodoNotVisible('タスク1');
-    await todoPage.expectTodoVisible('タスク2');
+    await authenticatedTodoPage.showActive();
+    await authenticatedTodoPage.expectTodoNotVisible('タスク1');
+    await authenticatedTodoPage.expectTodoVisible('タスク2');
 
     // 完了済みフィルター
-    await todoPage.showCompleted();
-    await todoPage.expectTodoVisible('タスク1');
-    await todoPage.expectTodoNotVisible('タスク2');
+    await authenticatedTodoPage.showCompleted();
+    await authenticatedTodoPage.expectTodoVisible('タスク1');
+    await authenticatedTodoPage.expectTodoNotVisible('タスク2');
 
     // すべてフィルター
-    await todoPage.showAll();
-    await todoPage.expectTodoVisible('タスク1');
-    await todoPage.expectTodoVisible('タスク2');
+    await authenticatedTodoPage.showAll();
+    await authenticatedTodoPage.expectTodoVisible('タスク1');
+    await authenticatedTodoPage.expectTodoVisible('タスク2');
   });
 
-  test('完了済みを一括削除できる', async () => {
+  test('完了済みを一括削除できる', async ({ authenticatedTodoPage }) => {
     // 複数のタスクを追加
-    await todoPage.addTodo('完了タスク1');
-    await todoPage.addTodo('完了タスク2');
-    await todoPage.addTodo('未完了タスク');
+    await authenticatedTodoPage.addTodo('完了タスク1');
+    await authenticatedTodoPage.addTodo('完了タスク2');
+    await authenticatedTodoPage.addTodo('未完了タスク');
 
     // 2つのタスクを完了にする
-    await todoPage.toggleTodo('完了タスク1');
-    await todoPage.toggleTodo('完了タスク2');
+    await authenticatedTodoPage.toggleTodo('完了タスク1');
+    await authenticatedTodoPage.toggleTodo('完了タスク2');
+    await authenticatedTodoPage.clearCompleted();
 
-    // 完了済みを削除
-    await todoPage.clearCompleted();
-
-    // 完了済みタスクが削除されたことを確認
-    await todoPage.expectTodoNotVisible('完了タスク1');
-    await todoPage.expectTodoNotVisible('完了タスク2');
-    await todoPage.expectTodoVisible('未完了タスク');
+    await authenticatedTodoPage.expectTodoNotVisible('完了タスク1');
+    await authenticatedTodoPage.expectTodoNotVisible('完了タスク2');
+    await authenticatedTodoPage.expectTodoVisible('未完了タスク');
   });
 
-  test('ログアウトするとログインページに戻る', async () => {
-    // ログアウト
-    await todoPage.logout();
-
-    // ログインページに遷移したことを確認
-    await todoPage.expectNavigatedToLogin();
+  test('ログアウトするとログインページに戻る', async ({
+    authenticatedTodoPage,
+    loginPage,
+  }) => {
+    await authenticatedTodoPage.logout();
+    await authenticatedTodoPage.expectNavigatedToLogin();
     await loginPage.expectPageVisible();
   });
 });
 
 test.describe('認証ガード', () => {
   test('未ログイン状態でTODOページにアクセスするとログインページにリダイレクトされる', async ({
-    page,
+    todoPage,
+    loginPage,
   }) => {
-    const todoPage = new TodoPage(page);
-    const loginPage = new LoginPage(page);
-
-    // 直接TODOページにアクセス
+    // todoPageフィクスチャは認証なし
     await todoPage.goto();
-
-    // ログインページにリダイレクトされることを確認
     await todoPage.expectNavigatedToLogin();
     await loginPage.expectPageVisible();
   });
