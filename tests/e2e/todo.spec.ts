@@ -1,151 +1,135 @@
 import { test, expect } from '@playwright/test';
+import { LoginPage } from '../pages/LoginPage';
+import { TodoPage } from '../pages/TodoPage';
 
 /**
  * TODOリスト機能のテスト
+ * Page Object Modelパターンを使用
  */
 test.describe('TODOリスト', () => {
+  let loginPage: LoginPage;
+  let todoPage: TodoPage;
+
   // 各テスト前にログインしてTODOページへ移動
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-    await page.getByLabel('メールアドレス').fill('test@example.com');
-    await page.getByLabel('パスワード').fill('password123');
-    await page.getByRole('button', { name: 'ログイン' }).click();
-    await expect(page).toHaveURL('/todos');
+    loginPage = new LoginPage(page);
+    todoPage = new TodoPage(page);
+
+    await loginPage.goto();
+    await loginPage.loginAsTestUser();
+    await loginPage.expectNavigatedToTodos();
   });
 
-  test('TODOページが正しく表示される', async ({ page }) => {
-    // ヘッダー確認
-    await expect(page.getByRole('heading', { name: 'TODOリスト' })).toBeVisible();
-    await expect(page.getByText('ようこそ、テストユーザーさん')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'ログアウト' })).toBeVisible();
-
-    // 入力フォーム確認
-    await expect(page.getByLabel('新しいタスク')).toBeVisible();
-    await expect(page.getByRole('button', { name: '追加' })).toBeVisible();
-
-    // フィルターボタン確認
-    await expect(page.getByRole('button', { name: /すべて/ })).toBeVisible();
-    await expect(page.getByRole('button', { name: /未完了/ })).toBeVisible();
-    await expect(page.getByRole('button', { name: /完了済み/ })).toBeVisible();
+  test('TODOページが正しく表示される', async () => {
+    // ページ要素の確認
+    await todoPage.expectPageVisible();
+    await todoPage.expectUserName('テストユーザー');
+    await expect(todoPage.logoutButton).toBeVisible();
 
     // 空メッセージ確認
-    await expect(page.getByText('タスクがありません')).toBeVisible();
+    await todoPage.expectEmptyMessage('タスクがありません。新しいタスクを追加してください。');
   });
 
-  test('新しいTODOを追加できる', async ({ page }) => {
+  test('新しいTODOを追加できる', async () => {
     const todoText = '買い物に行く';
 
-    // タスクを入力して追加
-    await page.getByLabel('新しいタスク').fill(todoText);
-    await page.getByRole('button', { name: '追加' }).click();
+    // タスクを追加
+    await todoPage.addTodo(todoText);
 
     // タスクが追加されたことを確認
-    await expect(page.getByText(todoText)).toBeVisible();
-
-    // 入力欄がクリアされたことを確認
-    await expect(page.getByLabel('新しいタスク')).toHaveValue('');
-
-    // フィルターのカウントが更新されたことを確認
-    await expect(page.getByRole('button', { name: 'すべて (1)' })).toBeVisible();
-    await expect(page.getByRole('button', { name: '未完了 (1)' })).toBeVisible();
+    await todoPage.expectTodoVisible(todoText);
+    await todoPage.expectInputCleared();
+    await todoPage.expectFilterCount('all', 1);
+    await todoPage.expectFilterCount('active', 1);
   });
 
-  test('空のテキストではTODOを追加できない', async ({ page }) => {
+  test('空のテキストではTODOを追加できない', async () => {
     // 空のまま追加ボタンをクリック
-    await page.getByRole('button', { name: '追加' }).click();
+    await todoPage.addButton.click();
 
     // 空メッセージが表示されたままであることを確認
-    await expect(page.getByText('タスクがありません')).toBeVisible();
+    await todoPage.expectEmptyMessage();
   });
 
-  test('TODOを完了にできる', async ({ page }) => {
+  test('TODOを完了にできる', async () => {
     const todoText = 'テストタスク';
 
     // タスクを追加
-    await page.getByLabel('新しいタスク').fill(todoText);
-    await page.getByRole('button', { name: '追加' }).click();
+    await todoPage.addTodo(todoText);
 
-    // チェックボックスをクリックして完了にする
-    await page.getByRole('checkbox', { name: `${todoText}を完了にする` }).click();
+    // 完了にする
+    await todoPage.toggleTodo(todoText);
 
-    // 完了状態になったことを確認
-    await expect(page.getByRole('checkbox', { name: `${todoText}を未完了にする` })).toBeChecked();
-
-    // フィルターのカウントが更新されたことを確認
-    await expect(page.getByRole('button', { name: '未完了 (0)' })).toBeVisible();
-    await expect(page.getByRole('button', { name: '完了済み (1)' })).toBeVisible();
+    // 完了状態の確認
+    await todoPage.expectTodoCompleted(todoText);
+    await todoPage.expectFilterCount('active', 0);
+    await todoPage.expectFilterCount('completed', 1);
   });
 
-  test('TODOを削除できる', async ({ page }) => {
+  test('TODOを削除できる', async () => {
     const todoText = '削除するタスク';
 
     // タスクを追加
-    await page.getByLabel('新しいタスク').fill(todoText);
-    await page.getByRole('button', { name: '追加' }).click();
+    await todoPage.addTodo(todoText);
 
-    // 削除ボタンをクリック
-    await page.getByRole('button', { name: `${todoText}を削除` }).click();
+    // 削除
+    await todoPage.deleteTodo(todoText);
 
     // タスクが削除されたことを確認
-    await expect(page.getByText(todoText)).not.toBeVisible();
-    await expect(page.getByText('タスクがありません')).toBeVisible();
+    await todoPage.expectTodoNotVisible(todoText);
+    await todoPage.expectEmptyMessage();
   });
 
-  test('フィルターでTODOを絞り込める', async ({ page }) => {
+  test('フィルターでTODOを絞り込める', async () => {
     // 複数のタスクを追加
-    await page.getByLabel('新しいタスク').fill('タスク1');
-    await page.getByRole('button', { name: '追加' }).click();
-    await page.getByLabel('新しいタスク').fill('タスク2');
-    await page.getByRole('button', { name: '追加' }).click();
+    await todoPage.addTodo('タスク1');
+    await todoPage.addTodo('タスク2');
 
     // タスク1を完了にする
-    await page.getByRole('checkbox', { name: 'タスク1を完了にする' }).click();
+    await todoPage.toggleTodo('タスク1');
 
-    // 未完了フィルターをクリック
-    await page.getByRole('button', { name: /未完了/ }).click();
-    await expect(page.getByText('タスク1')).not.toBeVisible();
-    await expect(page.getByText('タスク2')).toBeVisible();
+    // 未完了フィルター
+    await todoPage.showActive();
+    await todoPage.expectTodoNotVisible('タスク1');
+    await todoPage.expectTodoVisible('タスク2');
 
-    // 完了済みフィルターをクリック（「完了済みを削除」ボタンと区別するため完全一致）
-    await page.getByRole('button', { name: '完了済み (1)' }).click();
-    await expect(page.getByText('タスク1')).toBeVisible();
-    await expect(page.getByText('タスク2')).not.toBeVisible();
+    // 完了済みフィルター
+    await todoPage.showCompleted();
+    await todoPage.expectTodoVisible('タスク1');
+    await todoPage.expectTodoNotVisible('タスク2');
 
-    // すべてフィルターをクリック
-    await page.getByRole('button', { name: /すべて/ }).click();
-    await expect(page.getByText('タスク1')).toBeVisible();
-    await expect(page.getByText('タスク2')).toBeVisible();
+    // すべてフィルター
+    await todoPage.showAll();
+    await todoPage.expectTodoVisible('タスク1');
+    await todoPage.expectTodoVisible('タスク2');
   });
 
-  test('完了済みを一括削除できる', async ({ page }) => {
+  test('完了済みを一括削除できる', async () => {
     // 複数のタスクを追加
-    await page.getByLabel('新しいタスク').fill('完了タスク1');
-    await page.getByRole('button', { name: '追加' }).click();
-    await page.getByLabel('新しいタスク').fill('完了タスク2');
-    await page.getByRole('button', { name: '追加' }).click();
-    await page.getByLabel('新しいタスク').fill('未完了タスク');
-    await page.getByRole('button', { name: '追加' }).click();
+    await todoPage.addTodo('完了タスク1');
+    await todoPage.addTodo('完了タスク2');
+    await todoPage.addTodo('未完了タスク');
 
     // 2つのタスクを完了にする
-    await page.getByRole('checkbox', { name: '完了タスク1を完了にする' }).click();
-    await page.getByRole('checkbox', { name: '完了タスク2を完了にする' }).click();
+    await todoPage.toggleTodo('完了タスク1');
+    await todoPage.toggleTodo('完了タスク2');
 
-    // 完了済みを削除ボタンをクリック
-    await page.getByRole('button', { name: '完了済みを削除 (2)' }).click();
+    // 完了済みを削除
+    await todoPage.clearCompleted();
 
     // 完了済みタスクが削除されたことを確認
-    await expect(page.getByText('完了タスク1')).not.toBeVisible();
-    await expect(page.getByText('完了タスク2')).not.toBeVisible();
-    await expect(page.getByText('未完了タスク')).toBeVisible();
+    await todoPage.expectTodoNotVisible('完了タスク1');
+    await todoPage.expectTodoNotVisible('完了タスク2');
+    await todoPage.expectTodoVisible('未完了タスク');
   });
 
-  test('ログアウトするとログインページに戻る', async ({ page }) => {
-    // ログアウトボタンをクリック
-    await page.getByRole('button', { name: 'ログアウト' }).click();
+  test('ログアウトするとログインページに戻る', async () => {
+    // ログアウト
+    await todoPage.logout();
 
     // ログインページに遷移したことを確認
-    await expect(page).toHaveURL('/');
-    await expect(page.getByRole('heading', { name: 'ログイン' })).toBeVisible();
+    await todoPage.expectNavigatedToLogin();
+    await loginPage.expectPageVisible();
   });
 });
 
@@ -153,11 +137,14 @@ test.describe('認証ガード', () => {
   test('未ログイン状態でTODOページにアクセスするとログインページにリダイレクトされる', async ({
     page,
   }) => {
+    const todoPage = new TodoPage(page);
+    const loginPage = new LoginPage(page);
+
     // 直接TODOページにアクセス
-    await page.goto('/todos');
+    await todoPage.goto();
 
     // ログインページにリダイレクトされることを確認
-    await expect(page).toHaveURL('/');
-    await expect(page.getByRole('heading', { name: 'ログイン' })).toBeVisible();
+    await todoPage.expectNavigatedToLogin();
+    await loginPage.expectPageVisible();
   });
 });

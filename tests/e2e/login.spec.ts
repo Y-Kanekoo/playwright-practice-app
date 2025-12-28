@@ -1,112 +1,82 @@
 import { test, expect } from '@playwright/test';
+import { LoginPage } from '../pages/LoginPage';
 
 /**
  * ログイン機能のテスト
+ * Page Object Modelパターンを使用
  */
 test.describe('ログインページ', () => {
+  let loginPage: LoginPage;
+
   test.beforeEach(async ({ page }) => {
-    // 各テスト前にログインページへ移動
-    await page.goto('/');
+    // Page Objectを初期化
+    loginPage = new LoginPage(page);
+    await loginPage.goto();
   });
 
-  test('ログインページが正しく表示される', async ({ page }) => {
-    // タイトル確認
-    await expect(page.getByRole('heading', { name: 'ログイン' })).toBeVisible();
-
-    // フォーム要素の確認
-    await expect(page.getByLabel('メールアドレス')).toBeVisible();
-    await expect(page.getByLabel('パスワード')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'ログイン' })).toBeVisible();
-
-    // ヒントテキストの確認
-    await expect(page.getByText('テスト用:')).toBeVisible();
+  test('ログインページが正しく表示される', async () => {
+    await loginPage.expectPageVisible();
   });
 
-  test('メールアドレスが空の場合、エラーメッセージが表示される', async ({ page }) => {
+  test('メールアドレスが空の場合、エラーメッセージが表示される', async () => {
     // パスワードのみ入力
-    await page.getByLabel('パスワード').fill('password123');
-
-    // ログインボタンをクリック
-    await page.getByRole('button', { name: 'ログイン' }).click();
+    await loginPage.fillPassword('password123');
+    await loginPage.clickSubmit();
 
     // エラーメッセージ確認
-    await expect(page.getByRole('alert')).toHaveText('メールアドレスを入力してください');
+    await loginPage.expectErrorMessage('メールアドレスを入力してください');
   });
 
-  test('パスワードが空の場合、エラーメッセージが表示される', async ({ page }) => {
+  test('パスワードが空の場合、エラーメッセージが表示される', async () => {
     // メールアドレスのみ入力
-    await page.getByLabel('メールアドレス').fill('test@example.com');
-
-    // ログインボタンをクリック
-    await page.getByRole('button', { name: 'ログイン' }).click();
+    await loginPage.fillEmail('test@example.com');
+    await loginPage.clickSubmit();
 
     // エラーメッセージ確認
-    await expect(page.getByRole('alert')).toHaveText('パスワードを入力してください');
+    await loginPage.expectErrorMessage('パスワードを入力してください');
   });
 
-  test('無効なメールアドレス形式の場合、ブラウザバリデーションが表示される', async ({ page }) => {
+  test('無効なメールアドレス形式の場合、ブラウザバリデーションが表示される', async () => {
     // 無効なメールアドレスを入力
-    const emailInput = page.getByLabel('メールアドレス');
-    await emailInput.fill('invalid-email');
-    await page.getByLabel('パスワード').fill('password123');
-
-    // ログインボタンをクリック
-    await page.getByRole('button', { name: 'ログイン' }).click();
+    await loginPage.fillEmail('invalid-email');
+    await loginPage.fillPassword('password123');
+    await loginPage.clickSubmit();
 
     // HTML5バリデーションにより送信がブロックされることを確認
-    // (ブラウザが:invalid擬似クラスを適用する)
-    await expect(emailInput).toHaveAttribute('type', 'email');
+    await expect(loginPage.emailInput).toHaveAttribute('type', 'email');
   });
 
-  test('パスワードが6文字未満の場合、エラーメッセージが表示される', async ({ page }) => {
+  test('パスワードが6文字未満の場合、エラーメッセージが表示される', async () => {
     // 短いパスワードを入力
-    await page.getByLabel('メールアドレス').fill('test@example.com');
-    await page.getByLabel('パスワード').fill('12345');
-
-    // ログインボタンをクリック
-    await page.getByRole('button', { name: 'ログイン' }).click();
+    await loginPage.login('test@example.com', '12345');
 
     // エラーメッセージ確認
-    await expect(page.getByRole('alert')).toHaveText('パスワードは6文字以上で入力してください');
+    await loginPage.expectErrorMessage('パスワードは6文字以上で入力してください');
   });
 
-  test('認証情報が間違っている場合、エラーメッセージが表示される', async ({ page }) => {
-    // 間違った認証情報を入力
-    await page.getByLabel('メールアドレス').fill('wrong@example.com');
-    await page.getByLabel('パスワード').fill('wrongpassword');
+  test('認証情報が間違っている場合、エラーメッセージが表示される', async () => {
+    // 間違った認証情報でログイン
+    await loginPage.login('wrong@example.com', 'wrongpassword');
 
-    // ログインボタンをクリック
-    await page.getByRole('button', { name: 'ログイン' }).click();
-
-    // エラーメッセージ確認（ログイン処理を待つ）
-    await expect(page.getByRole('alert')).toHaveText(
-      'メールアドレスまたはパスワードが正しくありません'
-    );
+    // エラーメッセージ確認
+    await loginPage.expectErrorMessage('メールアドレスまたはパスワードが正しくありません');
   });
 
   test('正しい認証情報でログインするとTODOページに遷移する', async ({ page }) => {
-    // 正しい認証情報を入力
-    await page.getByLabel('メールアドレス').fill('test@example.com');
-    await page.getByLabel('パスワード').fill('password123');
-
-    // ログインボタンをクリック
-    await page.getByRole('button', { name: 'ログイン' }).click();
+    // テストユーザーでログイン
+    await loginPage.loginAsTestUser();
 
     // TODOページに遷移したことを確認
-    await expect(page).toHaveURL('/todos');
+    await loginPage.expectNavigatedToTodos();
     await expect(page.getByRole('heading', { name: 'TODOリスト' })).toBeVisible();
     await expect(page.getByText('ようこそ、テストユーザーさん')).toBeVisible();
   });
 
-  test('ログイン中はボタンが無効化される', async ({ page }) => {
-    // 認証情報を入力
-    await page.getByLabel('メールアドレス').fill('test@example.com');
-    await page.getByLabel('パスワード').fill('password123');
+  test('ログイン中はボタンが無効化される', async () => {
+    // 認証情報を入力してログイン
+    await loginPage.loginAsTestUser();
 
-    // ログインボタンをクリック
-    await page.getByRole('button', { name: 'ログイン' }).click();
-
-    // ボタンテキストが変わることを確認
-    await expect(page.getByRole('button', { name: 'ログイン中...' })).toBeVisible();
+    // ローディング状態を確認
+    await loginPage.expectLoading();
   });
 });
