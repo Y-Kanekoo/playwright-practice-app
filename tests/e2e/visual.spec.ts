@@ -12,7 +12,15 @@ import { test, expect } from '../fixtures';
  *
  * ベースライン更新:
  *   npx playwright test --update-snapshots
+ *
+ * 注意:
+ *   スナップショットはOS/ブラウザごとに異なるため、
+ *   CI環境（Linux）とローカル（macOS/Windows）で別々に管理が必要
+ *   CI環境ではスキップする設定にしています
  */
+
+// CI環境ではビジュアルテストをスキップ（OS間でスナップショットが異なるため）
+test.skip(!!process.env.CI, 'ビジュアルテストはローカル環境でのみ実行');
 
 test.describe('ビジュアルリグレッション', () => {
   test.describe('ログインページ', () => {
