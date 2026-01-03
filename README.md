@@ -1,14 +1,19 @@
 # Playwright 練習用アプリケーション
 
+[![Playwright Tests](https://github.com/Y-Kanekoo/playwright-practice-app/actions/workflows/playwright.yml/badge.svg)](https://github.com/Y-Kanekoo/playwright-practice-app/actions/workflows/playwright.yml)
+
 Playwright を使ったE2Eテストの学習・練習用アプリケーションです。
 
 ## 技術スタック
 
-- **フロントエンド**: React 18 + TypeScript
-- **ビルドツール**: Vite
-- **E2Eテスト**: Playwright
-- **ルーティング**: React Router
-- **CI/CD**: GitHub Actions
+| カテゴリ | 技術 |
+|---------|------|
+| フロントエンド | React 18 + TypeScript |
+| ビルドツール | Vite |
+| E2Eテスト | Playwright |
+| ルーティング | React Router |
+| CI/CD | GitHub Actions |
+| アクセシビリティ | axe-core |
 
 ## セットアップ
 
@@ -313,18 +318,38 @@ reporter: [
 - 気温・天気・湿度を表示
 - ローディング状態・エラー表示
 
-## 学習ロードマップ
+## テストサマリー
 
+| テストファイル | テスト数 | 内容 |
+|--------------|---------|------|
+| login.spec.ts | 8 | ログイン機能 |
+| todo.spec.ts | 9 | TODOリスト機能 |
+| api-mock.spec.ts | 7 | APIモック |
+| visual.spec.ts | 12 | ビジュアルリグレッション |
+| isolation.spec.ts | 16 | テスト分離 |
+| performance.spec.ts | 9 | パフォーマンス |
+| accessibility.spec.ts | 13 | アクセシビリティ |
+| **合計** | **74** | - |
+
+## 学習ロードマップ（全完了）
+
+### Phase 1: 基礎
 - [x] プロジェクトセットアップ
 - [x] 基本的なテストの書き方
 - [x] ロケーター戦略
+
+### Phase 2: 実践
 - [x] Page Object Model
 - [x] テストフィクスチャ
 - [x] 複数ブラウザテスト（Chromium, Firefox, WebKit, Mobile）
+
+### Phase 3: 応用
 - [x] APIモック・インターセプション
 - [x] CI/CD連携（GitHub Actions）
 - [x] ビジュアルリグレッションテスト
 - [x] 並列実行とテスト分離
+
+### Phase 4: 発展
 - [x] カスタムレポート作成
 - [x] パフォーマンステスト
 - [x] アクセシビリティテスト
