@@ -32,4 +32,6 @@ jobs:
     kind: e2e
     stage: e2e
     run: "npx playwright test --grep @smoke"
+    skip: true
+    skip_reason: "@smoke タグの E2E テストがない（代表シナリオに @smoke を付けたら skip を外す）"
 include_auto: false
