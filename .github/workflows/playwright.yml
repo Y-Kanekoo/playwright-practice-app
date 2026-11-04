@@ -34,7 +34,7 @@ jobs:
         run: npx playwright test
 
       # テストレポートをアップロード（失敗時も含む）
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
@@ -42,7 +42,7 @@ jobs:
           retention-days: 30
 
       # テスト結果のスクリーンショットをアップロード（失敗時）
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: test-results
